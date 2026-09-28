@@ -1,0 +1,50 @@
+{
+  "course": "build-cpu-emulator",
+  "language": "rust",
+  "language_id": 73,
+  "entrypoint": "main.rs",
+  "version": 1,
+  "content_hash": "8992225a2c49365d",
+  "lessons": [
+    {
+      "slug": "what-is-cpu",
+      "tests_hash": "35419c8e946d"
+    },
+    {
+      "slug": "instruction-formats",
+      "tests_hash": "4ed4b07ed7d9"
+    },
+    {
+      "slug": "memory-layout",
+      "tests_hash": "3d199df119dd"
+    },
+    {
+      "slug": "alu-instructions",
+      "tests_hash": "9a501fbfd97f"
+    },
+    {
+      "slug": "loads-stores",
+      "tests_hash": "06a187d2beea"
+    },
+    {
+      "slug": "branches",
+      "tests_hash": "6c674142595f"
+    },
+    {
+      "slug": "main-loop",
+      "tests_hash": "d384bd28ac19"
+    },
+    {
+      "slug": "calling-convention",
+      "tests_hash": "fc53789390ac"
+    },
+    {
+      "slug": "syscalls-io",
+      "tests_hash": "eadd6666f915"
+    },
+    {
+      "slug": "production-cpu",
+      "tests_hash": "4006deb50f81"
+    }
+  ]
+}
