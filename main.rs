@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::{self, BufRead}};
+use std::{collections::HashMap, io::{self, BufRead}, convert::TryInto};
 
 #[derive(Debug)]
 pub struct IOregisters {
