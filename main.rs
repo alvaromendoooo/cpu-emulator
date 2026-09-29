@@ -8,7 +8,7 @@ pub struct IOregisters {
 impl IOregisters {
     pub fn new() -> Self {
         Self {
-            register_map: HashMap::<usize, usize>::from([(0, 0)]),
+            register_map: [(0, 0)].into_iter().collect(),
         }
     }
 
