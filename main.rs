@@ -7,8 +7,11 @@ pub struct IOregisters {
 
 impl IOregisters {
     pub fn new() -> Self {
+        let mut register_map = HashMap::new();
+        register_map.insert(0, 0);
+
         Self {
-            register_map: [(0, 0)].into_iter().collect(),
+            register_map,
         }
     }
 
