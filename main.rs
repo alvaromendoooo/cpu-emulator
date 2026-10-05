@@ -13,6 +13,7 @@ pub struct MemoryBus {
 #[derive(Debug)]
 pub struct AluInstructions {
     pub registers: Vec<u32>,
+    pub memory_data: HashMap<u32, u32>
 }
 
 impl IOregisters {
@@ -101,6 +102,7 @@ impl AluInstructions {
     pub fn new(size: usize) -> Self {
         Self {
             registers: vec![0; size],
+            memory_data: HashMap::new(),
         }
     }
 
@@ -127,6 +129,22 @@ impl AluInstructions {
             .map(|reg| reg.to_string())
             .collect::<Vec<String>>()
             .join(",")
+    }
+
+    pub fn load_data_in_mem(&mut self, addr: u32, bytes: &str) {
+        let clean_bytes = bytes.trim_start_matches("0x").trim_start_matches("0X");
+        let lt_e_bytes = u32::from_str_radix(clean_bytes, 16).unwrap();
+        self.memory_data.insert(addr, lt_e_bytes);
+    }
+
+    pub fn load_word(&self, addr: u32) -> u32 {
+        let mut word : u32 = 0;
+        for offset in 0..4 {
+            let bytes : u32 = self.memory_data.get(&(addr + offset)).copied().unwrap_or(0);
+            word |= bytes << (offset * 8); // Bytes are hex format, don't need to apply 0xFF mask
+        }
+
+        word
     }
 }
 
@@ -202,6 +220,15 @@ fn main() {
                 alu.add(register_result, op1, op2);
             },
             "DUMP" => println!("{}", alu.dump()),
+            "MEM" => {
+                let mem_addr: u32 = parts[1].parse().unwrap();
+                let bytes: &str = parts[2];
+                alu.load_data_in_mem(mem_addr, bytes);
+            },
+            "LW" => {
+                let mem_addr: u32 = parts[1].parse().unwrap();
+                println!("{}", alu.load_word(mem_addr));
+            }
             _ => {}
         }
     }
