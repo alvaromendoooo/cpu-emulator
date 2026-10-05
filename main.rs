@@ -10,6 +10,11 @@ pub struct MemoryBus {
     pub memory: Vec<u8>,
 }
 
+#[derive(Debug)]
+pub struct AluInstructions {
+    pub registers: Vec<u32>,
+}
+
 impl IOregisters {
     pub fn new() -> Self {
         let mut register_map = HashMap::new();
@@ -92,6 +97,39 @@ impl MemoryBus {
     }
 }
 
+impl AluInstructions {
+    pub fn new(size: usize) -> Self {
+        Self {
+            registers: vec![0; size],
+        }
+    }
+
+    pub fn write_register_value(&mut self, register_id: usize, register_val: u32) {
+        if register_id != 0 && register_id < self.registers.len() {
+            self.registers[register_id] = register_val; // Save value of register inside 32 bit memory array
+        }
+    }
+
+    pub fn add(&mut self, register_result: usize, register_op1: usize, register_op2: usize) {
+        let op1_val_ref = self.registers.get(register_op1).copied().unwrap_or(0);
+        let op2_val_ref = self.registers.get(register_op2).copied().unwrap_or(0);
+
+        let sum = op1_val_ref.wrapping_add(op2_val_ref); // Operate with u32 to prevent override from usize max size
+
+        if register_result != 0 && register_result < self.registers.len() {
+            self.registers[register_result] = sum;
+        }
+    }
+
+    pub fn dump(&self) -> String {
+        self.registers
+            .iter()
+            .map(|reg| reg.to_string())
+            .collect::<Vec<String>>()
+            .join(",")
+    }
+}
+
 pub fn decode_opcode(line: String) -> String {
     
     let instruction = u32::from_str_radix(line.trim(), 16).unwrap();
@@ -114,7 +152,8 @@ pub fn decode_opcode(line: String) -> String {
 fn main() {
     let stdin = io::stdin();
     //let mut io_register = IOregisters::new();
-    let mut memory_bus = MemoryBus::new(1024);
+    //let mut memory_bus = MemoryBus::new(1024);
+    let mut alu = AluInstructions::new(32);
     for line in stdin.lock().lines() {
         let l = line.unwrap();
         if l.is_empty() { continue; }
@@ -132,7 +171,7 @@ fn main() {
             continue;
         }
 
-        match parts[0] {
+        /*match parts[0] {
             "WRITE" => {
                 let address: usize = parts[1].parse().unwrap();
                 let byte: u8 = parts[2].parse().unwrap();
@@ -147,6 +186,22 @@ fn main() {
                 let address: usize = parts[1].parse().unwrap();
                 println!("{}", memory_bus.read_word(address));
             }
+            _ => {}
+        }*/
+
+        match parts[0] {
+            "WRITE" => {
+                let register_id: usize = parts[1].parse().unwrap();
+                let register_val: u32 = parts[2].parse().unwrap();
+                alu.write_register_value(register_id, register_val);
+            },
+            "ADD" => {
+                let register_result: usize = parts[1].parse().unwrap();
+                let op1: usize = parts[2].parse().unwrap();
+                let op2: usize = parts[3].parse().unwrap();
+                alu.add(register_result, op1, op2);
+            },
+            "DUMP" => println!("{}", alu.dump()),
             _ => {}
         }
     }
