@@ -146,6 +146,23 @@ impl AluInstructions {
 
         word
     }
+
+    pub fn brach_decision(&self, op: &str, rs_1_val: i32, rs_2_val: i32, pc: i32, imm: i32) -> i32 {
+        let rs1_u = rs_1_val as u32;
+        let rs2_u = rs_2_val as u32;
+
+        let take_branch = match op {
+            "BEQ"  => rs_1_val == rs_2_val,
+            "BNE"  => rs_1_val != rs_2_val,
+            "BLT"  => rs_1_val < rs_2_val,
+            "BGE"  => rs_1_val >= rs_2_val,
+            "BLTU" => rs1_u < rs2_u,
+            "BGEU" => rs1_u >= rs2_u,
+            _      => false,
+        };
+
+        if take_branch { pc.wrapping_add(imm) } else { pc.wrapping_add(4) }
+    }
 }
 
 pub fn decode_opcode(line: String) -> String {
@@ -228,6 +245,15 @@ fn main() {
             "LW" => {
                 let mem_addr: u32 = parts[1].parse().unwrap();
                 println!("{}", alu.load_word(mem_addr));
+            },
+            "BRANCH" => {
+                let op = parts[1];
+                let rs_1_val: i32 = parts[2].parse().unwrap();
+                let rs_2_val: i32 = parts[3].parse().unwrap();
+                let pc: i32 = parts[4].parse().unwrap();
+                let imm = parts[5].parse().unwrap();
+
+                println!("{}", alu.brach_decision(op, rs_1_val, rs_2_val, pc, imm));
             }
             _ => {}
         }
