@@ -13,7 +13,7 @@ pub struct MemoryBus {
 #[derive(Debug)]
 pub struct AluInstructions {
     pub registers: Vec<u32>,
-    pub memory_data: HashMap<u32, u32>
+    pub memory_data: HashMap<u32, u32>,
 }
 
 impl IOregisters {
@@ -100,8 +100,12 @@ impl MemoryBus {
 
 impl AluInstructions {
     pub fn new(size: usize) -> Self {
+        let mut registers_init_values = vec![0, 10, 20, 30];
+        let mut default_registers_value = vec![0; size - registers_init_values.len()];
+
+        registers_init_values.append(&mut default_registers_value);
         Self {
-            registers: vec![0; size],
+            registers: registers_init_values,
             memory_data: HashMap::new(),
         }
     }
@@ -112,14 +116,77 @@ impl AluInstructions {
         }
     }
 
-    pub fn add(&mut self, register_result: usize, register_op1: usize, register_op2: usize) {
-        let op1_val_ref = self.registers.get(register_op1).copied().unwrap_or(0);
-        let op2_val_ref = self.registers.get(register_op2).copied().unwrap_or(0);
+    pub fn operation_display(&mut self, op: &str, rd: usize,  rs1: usize, rs2: usize) -> String {
+        let op1_val_ref = self.registers.get(rs1).copied().unwrap_or(0);
+        let op2_val_ref = self.registers.get(rs2).copied().unwrap_or(0);
+
+        match op {
+            "ADD" => {
+                self.add(rd, op1_val_ref, op2_val_ref);
+                format!("x{}={}", rd, self.registers.get(rd).copied().unwrap_or(0))
+            },
+            "SUB" => {
+                self.sub(rd, op1_val_ref, op2_val_ref);
+                format!("x{}={}", rd, self.registers.get(rd).copied().unwrap_or(0))
+            },
+            "XOR" => {
+                self.xor(rd, op1_val_ref, op2_val_ref);
+                format!("x{}={}", rd, self.registers.get(rd).copied().unwrap_or(0))
+            },
+            "AND" => {
+                self.and(rd, op1_val_ref, op2_val_ref);
+                format!("x{}={}", rd, self.registers.get(rd).copied().unwrap_or(0))
+            },
+            "OR" => {
+                self.or(rd, op1_val_ref, op2_val_ref);
+                format!("x{}={}", rd, self.registers.get(rd).copied().unwrap_or(0))
+            }
+            _ => String::new()
+        }
+    }
+
+    pub fn add(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
 
         let sum = op1_val_ref.wrapping_add(op2_val_ref); // Operate with u32 to prevent override from usize max size
 
         if register_result != 0 && register_result < self.registers.len() {
             self.registers[register_result] = sum;
+        }
+    }
+
+    pub fn sub(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
+
+        let sub = op1_val_ref.wrapping_sub(op2_val_ref); // Operate with u32 to prevent override from usize max size
+
+        if register_result != 0 && register_result < self.registers.len() {
+            self.registers[register_result] = sub;
+        }
+    }
+
+    pub fn xor(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
+
+        let xor = op1_val_ref ^ op2_val_ref; // Operate with u32 to prevent override from usize max size
+
+        if register_result != 0 && register_result < self.registers.len() {
+            self.registers[register_result] = xor;
+        }
+    }
+
+    pub fn and(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
+
+        let and = op1_val_ref & op2_val_ref; // Operate with u32 to prevent override from usize max size
+
+        if register_result != 0 && register_result < self.registers.len() {
+            self.registers[register_result] = and;
+        }
+    }
+
+    pub fn or(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
+
+        let or = op1_val_ref | op2_val_ref; // Operate with u32 to prevent override from usize max size
+
+        if register_result != 0 && register_result < self.registers.len() {
+            self.registers[register_result] = or;
         }
     }
 
@@ -224,7 +291,7 @@ fn main() {
             _ => {}
         }*/
 
-        match parts[0] {
+        /*match parts[0] {
             "WRITE" => {
                 let register_id: usize = parts[1].parse().unwrap();
                 let register_val: u32 = parts[2].parse().unwrap();
@@ -256,6 +323,8 @@ fn main() {
                 println!("{}", alu.brach_decision(op, rs_1_val, rs_2_val, pc, imm));
             }
             _ => {}
-        }
+        }*/
+
+        println!("{}", alu.operation_display(parts[0], parts[1].parse().unwrap(), parts[2].parse().unwrap(), parts[3].parse().unwrap()));
     }
 }
