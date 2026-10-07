@@ -230,6 +230,30 @@ impl AluInstructions {
 
         if take_branch { pc.wrapping_add(imm) } else { pc.wrapping_add(4) }
     }
+
+    pub fn register_argument_values(&mut self, register_id: i32, value: u32,) -> Result<(), &'static str>  {        
+        if register_id < 0 || register_id > 7 {
+            return Err("Argument registers are setted from a0 to a7");
+        }
+
+        self.registers[10 + register_id as usize] = value;
+
+        Ok(())
+    }
+
+    pub fn sum_arguments(&self) -> u32 {
+        let mut sum: u32 = 0;
+        let mut i = 8; // Number of registers reserved to arguments values
+
+        while i > 0 {
+            i -= 1;
+            let val = self.registers[10 + i as usize];
+            println!("val={:?}", val);
+            sum = sum.wrapping_add(val);
+        }
+
+        sum
+    }
 }
 
 pub fn decode_opcode(line: String) -> String {
@@ -291,7 +315,7 @@ fn main() {
             _ => {}
         }*/
 
-        /*match parts[0] {
+        match parts[0] {
             "WRITE" => {
                 let register_id: usize = parts[1].parse().unwrap();
                 let register_val: u32 = parts[2].parse().unwrap();
@@ -299,8 +323,8 @@ fn main() {
             },
             "ADD" => {
                 let register_result: usize = parts[1].parse().unwrap();
-                let op1: usize = parts[2].parse().unwrap();
-                let op2: usize = parts[3].parse().unwrap();
+                let op1: u32 = parts[2].parse().unwrap();
+                let op2: u32 = parts[3].parse().unwrap();
                 alu.add(register_result, op1, op2);
             },
             "DUMP" => println!("{}", alu.dump()),
@@ -322,9 +346,16 @@ fn main() {
 
                 println!("{}", alu.brach_decision(op, rs_1_val, rs_2_val, pc, imm));
             }
-            _ => {}
-        }*/
+            "ARG" => {
+                match alu.register_argument_values(parts[1].parse().unwrap(), parts[2].parse().unwrap()) {
+                    Ok(_) => {},
+                    Err(e) =>println!("{}", e),
+                };
+            }
+            _ => break
+        }
 
-        println!("{}", alu.operation_display(parts[0], parts[1].parse().unwrap(), parts[2].parse().unwrap(), parts[3].parse().unwrap()));
+        //println!("{}", alu.operation_display(parts[0], parts[1].parse().unwrap(), parts[2].parse().unwrap(), parts[3].parse().unwrap()));
     }
+    println!("{}", alu.sum_arguments());
 }
