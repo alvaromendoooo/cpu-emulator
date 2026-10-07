@@ -350,11 +350,35 @@ fn main() {
                     Ok(_) => {},
                     Err(e) =>println!("{}", e),
                 };
+            },
+            "ECALL" => {
+                match parts[1].parse::<i32>().unwrap() {
+                    64 => {
+                        let fd: i32 = parts[2].parse().unwrap();
+                        let buf: i32 = parts[3].parse().unwrap();
+                        let count: i32 = parts[4].parse().unwrap();
+
+                        println!("WRITE fd={} buf={} count={}", fd, buf, count);
+                    },
+                    93 => {
+                        let exit_code: i32 = parts[2].parse().unwrap();
+
+                        println!("EXIT {}", exit_code);
+                    },
+                    63 => {
+                        let fd: i32 = parts[2].parse().unwrap();
+                        let buf: i32 = parts[3].parse().unwrap();
+                        let count: i32 = parts[4].parse().unwrap();
+
+                        println!("READ fd={} buf={} count={}", fd, buf, count);
+                    },
+                    _ => println!("UNKNOWN {}", parts[1].parse::<i32>().unwrap()),
+                }
             }
             _ => break
         }
 
         //println!("{}", alu.operation_display(parts[0], parts[1].parse().unwrap(), parts[2].parse().unwrap(), parts[3].parse().unwrap()));
     }
-    println!("{}", alu.sum_arguments());
+    //println!("{}", alu.sum_arguments());
 }
