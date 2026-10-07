@@ -162,8 +162,7 @@ impl AluInstructions {
         if register_id >= self.registers.len() {
             self.registers.resize(register_id + 1, 0);
         }
-        let sum = self.registers[register_id].wrapping_add(imm);
-        self.registers[register_id] = sum;
+        self.registers[register_id] = imm; // ADDI <reg> <imm> sets the register to the immediate
     }
 
     pub fn sub(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
@@ -203,14 +202,7 @@ impl AluInstructions {
     }
 
     pub fn print(&mut self, register_id: u32) -> String {
-        let idx = register_id as usize;
-        let val = self.registers.get(idx).copied().unwrap_or(0);
-        
-        // Si el registro existe en el vector, lo limpiamos a 0
-        if idx < self.registers.len() {
-            self.registers[idx] = 0;
-        }
-        
+        let val = self.registers.get(register_id as usize).copied().unwrap_or(0);
         format!("{}", val)
     }
 
@@ -412,14 +404,13 @@ fn main() {
                     },
                     "PRINT" => {
                         let reg: u32 = parts[2].parse().unwrap();
-                        let val = alu.print(reg);
-                        println!("{}", val);
+                        println!("{}", alu.print(reg));
                     },
                     "EXIT" => {
                         let reg: u32 = parts[2].parse().unwrap();
-                        // Leemos el valor del registro directamente, no la variable 'result'
-                        let exit_val = alu.exit(reg); 
-                        println!("EXIT_CODE {}", exit_val);
+                        let val_in_reg = alu.registers.get(reg as usize).copied().unwrap_or(0);
+                        
+                        println!("EXIT_CODE {}", val_in_reg);
                         break;
                     },
                     _ => {}
