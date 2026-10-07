@@ -203,10 +203,14 @@ impl AluInstructions {
     }
 
     pub fn print(&mut self, register_id: u32) -> String {
-        let val = self.registers.get(register_id as usize).copied().unwrap_or(0);
-        if (register_id as usize) < self.registers.len() {
-            self.registers[register_id as usize] = 0;
+        let idx = register_id as usize;
+        let val = self.registers.get(idx).copied().unwrap_or(0);
+        
+        // Si el registro existe en el vector, lo limpiamos a 0
+        if idx < self.registers.len() {
+            self.registers[idx] = 0;
         }
+        
         format!("{}", val)
     }
 
@@ -402,18 +406,19 @@ fn main() {
             "INST" => {
                 match parts[1] {
                     "ADDI" => {
-                        let reg_id: usize = parts[2].parse().unwrap();
+                        let reg: usize = parts[2].parse().unwrap();
                         let imm: u32 = parts[3].parse().unwrap();
-                        alu.addi(reg_id, imm);
+                        alu.addi(reg, imm);
                     },
                     "PRINT" => {
-                        let reg_id: u32 = parts[2].parse().unwrap();
-                        let result = alu.print(reg_id);
-                        println!("{}", result);
+                        let reg: u32 = parts[2].parse().unwrap();
+                        let val = alu.print(reg);
+                        println!("{}", val);
                     },
                     "EXIT" => {
-                        let reg_id: u32 = parts[2].parse().unwrap();
-                        let exit_val = alu.exit(reg_id);
+                        let reg: u32 = parts[2].parse().unwrap();
+                        // Leemos el valor del registro directamente, no la variable 'result'
+                        let exit_val = alu.exit(reg); 
                         println!("EXIT_CODE {}", exit_val);
                         break;
                     },
