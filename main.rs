@@ -100,12 +100,13 @@ impl MemoryBus {
 
 impl AluInstructions {
     pub fn new(size: usize) -> Self {
-        let mut registers_init_values = vec![0, 10, 20, 30];
-        let mut default_registers_value = vec![0; size - registers_init_values.len()];
+        //let mut registers_init_values = vec![0, 10, 20, 30];
+        //let mut default_registers_value = vec![0; size - registers_init_values.len()];
 
-        registers_init_values.append(&mut default_registers_value);
+        //registers_init_values.append(&mut default_registers_value);
         Self {
-            registers: registers_init_values,
+            //registers: registers_init_values,
+            registers: vec![0; size],
             memory_data: HashMap::new(),
         }
     }
@@ -154,6 +155,14 @@ impl AluInstructions {
         }
     }
 
+    pub fn addi(&mut self, register_id: usize, imm: u32) {
+
+        if register_id != 0 && register_id < self.registers.len() {
+            let sum = self.registers[register_id].wrapping_add(imm);
+            self.registers[register_id] = sum;
+        }
+    } 
+
     pub fn sub(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
 
         let sub = op1_val_ref.wrapping_sub(op2_val_ref); // Operate with u32 to prevent override from usize max size
@@ -188,6 +197,17 @@ impl AluInstructions {
         if register_result != 0 && register_result < self.registers.len() {
             self.registers[register_result] = or;
         }
+    }
+
+    pub fn print(&mut self, register_id: u32) -> String {
+        let result = format!("{}", self.registers[register_id as usize]);
+        self.registers[register_id as usize] = 0;
+
+        result
+    }
+
+    pub fn exit(&self, register_id: u32) -> String {
+        format!("{}", self.registers[register_id as usize])
     }
 
     pub fn dump(&self) -> String {
@@ -290,7 +310,6 @@ fn main() {
         }*/
 
         // println!("{}", decode_opcode(l));
-
         let parts: Vec<&str> = l.split_whitespace().collect();
         if parts.is_empty() {
             continue;
@@ -313,7 +332,7 @@ fn main() {
             }
             _ => {}
         }*/
-
+        
         match parts[0] {
             "WRITE" => {
                 let register_id: usize = parts[1].parse().unwrap();
@@ -373,6 +392,19 @@ fn main() {
                         println!("READ fd={} buf={} count={}", fd, buf, count);
                     },
                     _ => println!("UNKNOWN {}", parts[1].parse::<i32>().unwrap()),
+                }
+            },
+            "INST" => {
+                match parts[1] {
+                    "ADDI" => {
+                        alu.addi(
+                            parts[2].parse().unwrap(),
+                            parts[3].parse().unwrap()
+                        );
+                    },
+                    "PRINT" => println!("{}", alu.print(parts[2].parse().unwrap())),
+                    "EXIT" => { println!("EXIT_CODE {}", alu.exit(parts[2].parse().unwrap())); break; },
+                    _ => {}
                 }
             }
             _ => break
