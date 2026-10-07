@@ -248,7 +248,6 @@ impl AluInstructions {
         while i > 0 {
             i -= 1;
             let val = self.registers[10 + i as usize];
-            println!("val={:?}", val);
             sum = sum.wrapping_add(val);
         }
 
