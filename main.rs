@@ -156,12 +156,15 @@ impl AluInstructions {
     }
 
     pub fn addi(&mut self, register_id: usize, imm: u32) {
-
-        if register_id != 0 && register_id < self.registers.len() {
-            let sum = self.registers[register_id].wrapping_add(imm);
-            self.registers[register_id] = sum;
+        if register_id == 0 {
+            return;
         }
-    } 
+        if register_id >= self.registers.len() {
+            self.registers.resize(register_id + 1, 0);
+        }
+        let sum = self.registers[register_id].wrapping_add(imm);
+        self.registers[register_id] = sum;
+    }
 
     pub fn sub(&mut self, register_result: usize, op1_val_ref: u32, op2_val_ref: u32) {
 
@@ -200,14 +203,16 @@ impl AluInstructions {
     }
 
     pub fn print(&mut self, register_id: u32) -> String {
-        let result = format!("{}", self.registers[register_id as usize]);
-        self.registers[register_id as usize] = 0;
-
-        result
+        let val = self.registers.get(register_id as usize).copied().unwrap_or(0);
+        if (register_id as usize) < self.registers.len() {
+            self.registers[register_id as usize] = 0;
+        }
+        format!("{}", val)
     }
 
     pub fn exit(&self, register_id: u32) -> String {
-        format!("{}", self.registers[register_id as usize])
+        let val = self.registers.get(register_id as usize).copied().unwrap_or(0);
+        format!("{}", val)
     }
 
     pub fn dump(&self) -> String {
@@ -397,16 +402,24 @@ fn main() {
             "INST" => {
                 match parts[1] {
                     "ADDI" => {
-                        alu.addi(
-                            parts[2].parse().unwrap(),
-                            parts[3].parse().unwrap()
-                        );
+                        let reg_id: usize = parts[2].parse().unwrap();
+                        let imm: u32 = parts[3].parse().unwrap();
+                        alu.addi(reg_id, imm);
                     },
-                    "PRINT" => println!("{}", alu.print(parts[2].parse().unwrap())),
-                    "EXIT" => { println!("EXIT_CODE {}", alu.exit(parts[2].parse().unwrap())); break; },
+                    "PRINT" => {
+                        let reg_id: u32 = parts[2].parse().unwrap();
+                        let result = alu.print(reg_id);
+                        println!("{}", result);
+                    },
+                    "EXIT" => {
+                        let reg_id: u32 = parts[2].parse().unwrap();
+                        let exit_val = alu.exit(reg_id);
+                        println!("EXIT_CODE {}", exit_val);
+                        break;
+                    },
                     _ => {}
                 }
-            }
+            },
             _ => break
         }
 
